@@ -13,7 +13,7 @@ class ProductCreate(BaseModel):
 class Product(BaseModel):
     """Modelo completo do produto"""
     id: str = Field(..., description="ID único do produto")
-    data_hora_compra: datetime = Field(..., description="Data e hora da compra")
+    data_hora_compra: str = Field(..., description="Data e hora da compra")
     local_compra: str = Field(..., description="Local onde foi feita a compra")
     descricao: str = Field(..., description="Descrição do produto")
     sku: str = Field(..., description="SKU do produto")
@@ -26,8 +26,8 @@ class ProductFilter(BaseModel):
     sku: Optional[str] = None
     preco_min: Optional[float] = None
     preco_max: Optional[float] = None
-    data_inicio: Optional[datetime] = None
-    data_fim: Optional[datetime] = None
+    data_inicio: Optional[str] = None
+    data_fim: Optional[str] = None
     limite: Optional[int] = Field(default=100, le=1000)
 
 class ProductResponse(BaseModel):

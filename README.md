@@ -125,7 +125,7 @@ curl "http://localhost:8000/produtos?preco_min=10.00&preco_max=20.00"
 ## Tecnologias Utilizadas
 
 - **FastAPI**: Framework web moderno e rápido
-- **Firebase Firestore**: Banco de dados NoSQL
+- **Firebase**: Banco de dados NoSQL
 - **Pydantic**: Validação de dados
 - **Uvicorn**: Servidor ASGI
 - **Python-dotenv**: Gerenciamento de variáveis de ambiente

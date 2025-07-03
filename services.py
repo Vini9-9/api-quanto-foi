@@ -51,54 +51,56 @@ class ProductService:
     #         logger.error(f"Erro ao criar produto: {str(e)}")
     #         raise
     
-    # async def get_products(self, filters: ProductFilter) -> List[Product]:
-    #     """Busca produtos com filtros"""
-    #     try:
-    #         query = self.collection
+    async def get_products(self, filters: ProductFilter) -> List[Product]:
+        """Busca produtos com filtros"""
+        try:
+            # Obter todos os produtos da referência base
+            all_products = self.repository.get_products()
+            print('all_products', all_products)
             
-    #         # Aplicar filtros
-    #         if filters.local_compra:
-    #             query = query.where("local_compra", "==", filters.local_compra)
-            
-    #         if filters.sku:
-    #             query = query.where("sku", "==", filters.sku)
-            
-    #         if filters.preco_min is not None:
-    #             query = query.where("preco", ">=", filters.preco_min)
-            
-    #         if filters.preco_max is not None:
-    #             query = query.where("preco", "<=", filters.preco_max)
-            
-    #         if filters.data_inicio:
-    #             query = query.where("data_hora_compra", ">=", filters.data_inicio)
-            
-    #         if filters.data_fim:
-    #             query = query.where("data_hora_compra", "<=", filters.data_fim)
-            
-    #         # Limitar resultados
-    #         query = query.limit(filters.limite)
-            
-    #         # Executar query
-    #         docs = query.stream()
-            
-    #         # Converter para lista de produtos
-    #         products = []
-    #         for doc in docs:
-    #             product_data = doc.to_dict()
-    #             product_data["id"] = doc.id
-                
-    #             # Filtro por descrição (não suportado nativamente pelo Firestore)
-    #             if filters.descricao:
-    #                 if filters.descricao.lower() not in product_data["descricao"].lower():
-    #                     continue
-                
-    #             products.append(Product(**product_data))
-            
-    #         return products
-            
-    #     except Exception as e:
-    #         logger.error(f"Erro ao buscar produtos: {str(e)}")
-    #         raise
+            products = []
+            if isinstance(all_products, list):
+                for product_data in all_products:
+                    product_data["id"] = str(product_data.get("id"))
+                    # Aplicar filtros
+                    if filters.local_compra and product_data.get("local_compra") != filters.local_compra:
+                        continue
+                        
+                    if filters.sku and product_data.get("sku") != filters.sku:
+                        continue
+                        
+                    if filters.preco_min is not None and product_data.get("preco", 0) < filters.preco_min:
+                        continue
+                        
+                    if filters.preco_max is not None and product_data.get("preco", float('inf')) > filters.preco_max:
+                        continue
+                        
+                    if filters.data_inicio:
+                        # Converte a string ISO do Firebase para datetime
+                        data_compra = datetime.fromisoformat(product_data["data_hora_compra"])
+                        if data_compra < filters.data_inicio:
+                            continue
+                        
+                    if filters.data_fim:
+                        data_compra = datetime.fromisoformat(product_data["data_hora_compra"])
+                        if data_compra > filters.data_fim:
+                            continue
+                        
+                    # Filtro por descrição
+                    if filters.descricao and filters.descricao.lower() not in product_data.get("descricao", "").lower():
+                        continue
+                        
+                    products.append(Product(**product_data))
+                    
+                    # Limitar resultados
+                    if filters.limite and len(products) >= filters.limite:
+                        break
+                    
+            return products
+        
+        except Exception as e:
+            logger.error(f"Erro ao buscar produtos: {str(e)}")
+            raise
     
     # async def get_product_by_id(self, product_id: str) -> Optional[Product]:
     #     """Busca um produto por ID"""

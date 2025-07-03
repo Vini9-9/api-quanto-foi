@@ -80,7 +80,7 @@ async def listar_produtos(
         
         # Buscar produtos
         products = await product_service.get_products(filters)
-        total = await product_service.count_products(filters)
+        total = len(products)
         
         # Preparar resposta
         response = ProductResponse(
