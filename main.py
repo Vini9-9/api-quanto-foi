@@ -1,12 +1,12 @@
-from fastapi import FastAPI, HTTPException, Query, Depends
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Optional
 from datetime import datetime
+from datetime import date
 import logging
 
 from models import Product, ProductCreate, ProductFilter, ProductResponse
 from services import product_service
-import json
 
 # Configurar logging
 logging.basicConfig(level=logging.INFO)
@@ -55,24 +55,20 @@ async def criar_produto(produto: ProductCreate):
 
 @app.get("/produtos", response_model=ProductResponse)
 async def listar_produtos(
-    local_compra: Optional[str] = Query(None, description="Filtrar por local da compra"),
+    local: Optional[str] = Query(None, description="Filtrar por local da compra"),
     descricao: Optional[str] = Query(None, description="Filtrar por descrição do produto"),
     sku: Optional[str] = Query(None, description="Filtrar por SKU do produto"),
-    preco_min: Optional[float] = Query(None, ge=0, description="Preço mínimo"),
-    preco_max: Optional[float] = Query(None, ge=0, description="Preço máximo"),
-    data_inicio: Optional[datetime] = Query(None, description="Data de início (ISO format)"),
-    data_fim: Optional[datetime] = Query(None, description="Data de fim (ISO format)"),
+    data_inicio: Optional[date] = Query(None, description="Data de início (ISO format)"),
+    data_fim: Optional[date] = Query(None, description="Data de fim (ISO format)"),
     limite: Optional[int] = Query(100, ge=1, le=1000, description="Limite de resultados")
 ):
     """Lista produtos com filtros opcionais"""
     try:
         # Criar filtros
         filters = ProductFilter(
-            local_compra=local_compra,
+            local=local,
             descricao=descricao,
             sku=sku,
-            preco_min=preco_min,
-            preco_max=preco_max,
             data_inicio=data_inicio,
             data_fim=data_fim,
             limite=limite
@@ -80,25 +76,23 @@ async def listar_produtos(
         
         # Buscar produtos
         products = await product_service.get_products(filters)
-        total = await product_service.count_products(filters)
+        total = len(products)
         
         # Preparar resposta
         response = ProductResponse(
             produtos=products,
             total=total,
             filtros_aplicados={
-                "local_compra": local_compra,
+                "local": local,
                 "descricao": descricao,
                 "sku": sku,
-                "preco_min": preco_min,
-                "preco_max": preco_max,
                 "data_inicio": data_inicio,
                 "data_fim": data_fim,
                 "limite": limite
             }
         )
         
-        logger.info(f"Produtos encontrados: {len(products)}")
+        logger.info(f"Produtos encontrados: {total}")
         return response
         
     except Exception as e:

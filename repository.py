@@ -18,4 +18,7 @@ class FirebaseRepository:
         })
 
     def get_info(self):
-        return db.reference(f'info').get()
+        return db.reference('info').get()
+    
+    def get_products(self):
+        return db.reference('produtos').get() or {}

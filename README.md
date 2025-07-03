@@ -16,8 +16,8 @@ API REST em Python para gerenciar compras de mercado com integração ao Firebas
 ```json
 {
   "id": "string (gerado automaticamente)",
-  "data_hora_compra": "datetime (gerado automaticamente)",
-  "local_compra": "string",
+  "data": "datetime (gerado automaticamente)",
+  "local": "string",
   "descricao": "string",
   "sku": "string",
   "preco": "float"
@@ -48,7 +48,7 @@ Cria um novo produto
 **Body:**
 ```json
 {
-  "local_compra": "Supermercado XYZ",
+  "local": "Supermercado XYZ",
   "descricao": "Leite integral 1L",
   "sku": "LEITE-001",
   "preco": 4.50
@@ -59,7 +59,7 @@ Cria um novo produto
 Lista produtos com filtros opcionais
 
 **Query Parameters:**
-- `local_compra`: Filtrar por local da compra
+- `local`: Filtrar por local da compra
 - `descricao`: Filtrar por descrição do produto
 - `sku`: Filtrar por SKU do produto
 - `preco_min`: Preço mínimo
@@ -87,7 +87,7 @@ A documentação interativa está disponível em:
 curl -X POST "http://localhost:8000/produtos" \
   -H "Content-Type: application/json" \
   -d '{
-    "local_compra": "Supermercado ABC",
+    "local": "Supermercado ABC",
     "descricao": "Arroz branco 5kg",
     "sku": "ARR-001",
     "preco": 12.90
@@ -101,7 +101,7 @@ curl "http://localhost:8000/produtos"
 
 ### Filtrar produtos por local
 ```bash
-curl "http://localhost:8000/produtos?local_compra=Supermercado%20ABC"
+curl "http://localhost:8000/produtos?local=Supermercado%20ABC"
 ```
 
 ### Filtrar produtos por faixa de preço
@@ -125,7 +125,7 @@ curl "http://localhost:8000/produtos?preco_min=10.00&preco_max=20.00"
 ## Tecnologias Utilizadas
 
 - **FastAPI**: Framework web moderno e rápido
-- **Firebase Firestore**: Banco de dados NoSQL
+- **Firebase**: Banco de dados NoSQL
 - **Pydantic**: Validação de dados
 - **Uvicorn**: Servidor ASGI
 - **Python-dotenv**: Gerenciamento de variáveis de ambiente
