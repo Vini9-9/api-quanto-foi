@@ -1,5 +1,5 @@
 from datetime import date, datetime
-from typing import List
+from typing import List, Optional
 from models import Product, ProductCreate, ProductFilter
 import logging
 from repository import FirebaseRepository
@@ -43,6 +43,10 @@ class ProductService:
     async def get_products(self, filters: ProductFilter) -> List[Product]:
         """Busca produtos com filtros"""
         try:
+            if filters.sku:
+                products_data = await self.repository.get_by_sku(filters.sku)
+                return [Product(**p) for p in products_data]
+            
             # Obter todos os produtos da referência base
             all_products = await self.repository.get_all()
             print('all_products', all_products)
@@ -58,9 +62,9 @@ class ProductService:
                 if filters.local and product_data.get("local") != filters.local:
                     continue
                     
-                # Filtro por SKU
-                if filters.sku and product_data.get("sku") != filters.sku:
-                    continue
+                # # Filtro por SKU
+                # if filters.sku and product_data.get("sku") != filters.sku:
+                #     continue
                     
                 # Filtro por data de início
                 if filters.data_inicio:

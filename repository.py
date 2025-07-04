@@ -2,8 +2,7 @@ import firebase_admin
 from firebase_admin import db, credentials
 from dotenv import load_dotenv
 import os
-from datetime import datetime, timedelta
-from typing import Dict, Optional
+from typing import Dict, List
 
 load_dotenv()
 
@@ -24,8 +23,16 @@ class FirebaseRepository:
         return db.reference('info').get()
     
     async def get_all(self) -> Dict[str, Dict]:
-        """Obtém todos os produtos (para filtros complexos)."""
+        """Obtém todos os produtos"""
         return self._base_ref.get() or {}
+    
+    async def get_by_sku(self, sku: str) -> List[Dict]:
+        """Retorna lista de produtos com o SKU especificado."""
+        product_ids = self._index_ref.child(f"por_sku/{sku}").get() or {}
+        return [
+            {"id": pid, **self._base_ref.child(pid).get()}
+            for pid in product_ids.keys()
+        ]
     
     async def create_product(self, product_data: Dict) -> Dict:
         """Cria produto e atualiza índices."""
