@@ -58,8 +58,8 @@ async def listar_produtos(
     local: Optional[str] = Query(None, description="Filtrar por local da compra"),
     descricao: Optional[str] = Query(None, description="Filtrar por descrição do produto"),
     sku: Optional[str] = Query(None, description="Filtrar por SKU do produto"),
-    data_inicio: Optional[date] = Query(None, description="Data de início (ISO format)"),
-    data_fim: Optional[date] = Query(None, description="Data de fim (ISO format)"),
+    data_inicio: Optional[str] = Query(None, description="Data de início (yyyy-MM-dd)"),
+    data_fim: Optional[str] = Query(None, description="Data de fim (yyyy-MM-dd)"),
     limite: Optional[int] = Query(100, ge=1, le=1000, description="Limite de resultados")
 ):
     """Lista produtos com filtros opcionais"""

@@ -34,6 +34,14 @@ class FirebaseRepository:
             for pid in product_ids.keys()
         ]
     
+    async def get_by_date(self, date: str) -> Dict[str, Dict]:
+        """Obtém produtos por data"""
+        product_ids = self._index_ref.child(f"por_data/{date}").get() or {}
+        return {
+            pid: self._base_ref.child(pid).get()
+            for pid in product_ids.keys()
+        }
+    
     async def create_product(self, product_data: Dict) -> Dict:
         """Cria produto e atualiza índices."""
         new_ref = self._base_ref.push()
