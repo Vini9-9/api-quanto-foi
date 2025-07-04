@@ -3,6 +3,7 @@ from typing import Optional
 
 class ProductCreate(BaseModel):
     """Modelo para criar um novo produto"""
+    data: Optional[str] = Field(..., description="Data da compra")
     local: str = Field(..., description="Local onde foi feita a compra")
     descricao: str = Field(..., description="Descrição do produto")
     sku: str = Field(..., description="SKU do produto")

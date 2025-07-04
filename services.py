@@ -1,8 +1,6 @@
-from datetime import datetime
-from typing import List, Optional
-# from firebase_admin import firestore
+from datetime import date, datetime
+from typing import List
 from models import Product, ProductCreate, ProductFilter
-# from firebase_config import db
 import logging
 from repository import FirebaseRepository
 
@@ -12,7 +10,6 @@ class ProductService:
     _instance = None
     """Serviço para gerenciar produtos no Firebase"""
     
-
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super(ProductService, cls).__new__(cls)
@@ -25,37 +22,29 @@ class ProductService:
     def get_info(self):
             return self.repository.get_info()
 
-    # async def create_product(self, product_data: ProductCreate) -> Product:
-    #     """Cria um novo produto no Firebase"""
-    #     try:
-    #         # Preparar dados do produto
-    #         product_dict = {
-    #             "data": datetime.now(),
-    #             "local": product_data.local,
-    #             "descricao": product_data.descricao,
-    #             "sku": product_data.sku,
-    #             "preco": product_data.preco
-    #         }
+    async def create_product(self, product_data: ProductCreate) -> Product:
+        """Valida dados e cria produto."""
+        try:
+            # Converte o modelo Pydantic para dicionário (modificável)
+            product_dict = product_data.model_dump()
             
-    #         # Salvar no Firebase
-    #         doc_ref = self.collection.add(product_dict)
-    #         product_id = doc_ref[1].id
+            # Atribui data atual se não existir
+            if not product_dict.get("data"):
+                product_dict["data"] = date.today().isoformat()
             
-    #         # Retornar produto criado
-    #         return Product(
-    #             id=product_id,
-    #             **product_dict
-    #         )
-            
-    #     except Exception as e:
-    #         logger.error(f"Erro ao criar produto: {str(e)}")
-    #         raise
+            # Cria via repository (envia o dicionário, não o modelo)
+            created_data = await self.repository.create_product(product_dict)
+            return Product(**created_data)
+        
+        except Exception as e:
+            logger.error(f"Erro ao criar produto: {str(e)}")
+            raise
     
     async def get_products(self, filters: ProductFilter) -> List[Product]:
         """Busca produtos com filtros"""
         try:
             # Obter todos os produtos da referência base
-            all_products = self.repository.get_products()
+            all_products = await self.repository.get_all()
             print('all_products', all_products)
             
             products = []
@@ -103,32 +92,6 @@ class ProductService:
         except Exception as e:
             logger.error(f"Erro ao buscar produtos: {str(e)}")
             raise
-
-    # async def get_product_by_id(self, product_id: str) -> Optional[Product]:
-    #     """Busca um produto por ID"""
-    #     try:
-    #         doc = self.collection.document(product_id).get()
-            
-    #         if doc.exists:
-    #             product_data = doc.to_dict()
-    #             product_data["id"] = doc.id
-    #             return Product(**product_data)
-            
-    #         return None
-            
-    #     except Exception as e:
-    #         logger.error(f"Erro ao buscar produto por ID: {str(e)}")
-    #         raise
-    
-    # async def count_products(self, filters: ProductFilter) -> int:
-    #     """Conta o número de produtos com os filtros aplicados"""
-    #     try:
-    #         products = await self.get_products(filters)
-    #         return len(products)
-            
-    #     except Exception as e:
-    #         logger.error(f"Erro ao contar produtos: {str(e)}")
-    #         raise
 
 # Instância global do serviço
 product_service = ProductService()
