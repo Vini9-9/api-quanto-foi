@@ -7,6 +7,9 @@ class ProdutoItem(BaseModel):
     sku: str
     preco: float = Field(..., gt=0)
 
+class ProductUpdate(BaseModel):
+    descricao: str = Field(..., min_length=1, description="Nova descrição do produto")
+
 class ProdutoBatchCreate(BaseModel):
     local: str
     data: Optional[str] = None  # Opcional (será preenchida se não informada)

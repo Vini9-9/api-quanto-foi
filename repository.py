@@ -2,7 +2,7 @@ import firebase_admin
 from firebase_admin import db, credentials
 from dotenv import load_dotenv
 import os
-from typing import Dict, List
+from typing import Any, Dict, List
 
 load_dotenv()
 
@@ -57,3 +57,9 @@ class FirebaseRepository:
         
         db.reference().update(updates)
         return product_data
+    
+    async def update_product(self, product_id: str, updates: Dict[str, Any]) -> Dict:
+        """Atualiza campos específicos de um produto"""
+        product_ref = self._base_ref.child(product_id)
+        product_ref.update(updates)
+        return {**product_ref.get(), "id": product_id}

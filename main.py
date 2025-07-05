@@ -1,11 +1,11 @@
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Path, Query
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Optional
 from datetime import datetime
 from datetime import date
 import logging
 
-from models import Product, ProductCreate, ProductFilter, ProductResponse, ProdutoBatchCreate
+from models import Product, ProductCreate, ProductFilter, ProductResponse, ProductUpdate, ProdutoBatchCreate
 from services import product_service
 
 # Configurar logging
@@ -41,6 +41,29 @@ async def root():
             "documentacao": "GET /docs"
         }
     }
+
+@app.patch("/produtos/{sku}/descricao", response_model=Product)
+async def atualizar_descricao_produto(
+    update_data: ProductUpdate,
+    sku: str = Path(..., description="SKU do produto a ser atualizado"),
+):
+    """Atualiza apenas a descrição de um produto pelo SKU"""
+    try:
+        # 1. Encontra o produto pelo SKU
+        product = await product_service.get_product_by_sku(sku)
+        if not product:
+            raise HTTPException(status_code=404, detail="Produto não encontrado")
+
+        # 2. Atualiza apenas a descrição
+        updated_product = await product_service.update_product_description(
+            product_id=product.id,
+            new_description=update_data.descricao
+        )
+        
+        return updated_product
+        
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 @app.post("/produtos", response_model=Product)
 async def criar_produto(produto: ProductCreate):

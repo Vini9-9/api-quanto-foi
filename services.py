@@ -90,18 +90,6 @@ class ProductService:
         if filters.local and product_data.get("local") != filters.local:
             return False
             
-        # Filtro por preço mínimo
-        if filters.preco_min is not None:
-            preco = product_data.get("preco")
-            if preco is None or preco < filters.preco_min:
-                return False
-        
-        # Filtro por preço máximo
-        if filters.preco_max is not None:
-            preco = product_data.get("preco")
-            if preco is None or preco > filters.preco_max:
-                return False
-        
         # Filtro por data de início
         if filters.data_inicio:
             data_produto = product_data.get("data")
@@ -121,6 +109,29 @@ class ProductService:
                 return False
         
         return True
+    
+    async def get_product_by_sku(self, sku: str) -> Optional[Product]:
+        """Obtém o primeiro produto com o SKU especificado"""
+        try:
+            products_data = await self.repository.get_by_sku(sku)
+            
+            # Retorna None se a lista estiver vazia
+            if not products_data:
+                return None
+                
+            # Pega o primeiro produto da lista
+            first_product = products_data[0]
+            return Product(**first_product)
+        
+        except Exception as e:
+            logger.error(f"Erro ao buscar produto por SKU {sku}: {str(e)}")
+            raise  # Re-lança a exceção para tratamento no controller
+
+    async def update_product_description(self, product_id: str, new_description: str) -> Product:
+        """Atualiza apenas a descrição de um produto"""
+        updates = {"descricao": new_description}
+        updated_data = await self.repository.update_product(product_id, updates)
+        return Product(**updated_data)
 
 # Instância global do serviço
 product_service = ProductService()
