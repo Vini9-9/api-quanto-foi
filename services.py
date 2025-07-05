@@ -53,7 +53,6 @@ class ProductService:
             
             # Obter todos os produtos da referência base
             all_products = await self.repository.get_all()
-            print('all_products', all_products)
             
             products = []
             # Iterar sobre os itens do dicionário (id é a chave do Firebase)

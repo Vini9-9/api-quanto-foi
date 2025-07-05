@@ -1,11 +1,11 @@
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
-from typing import Optional
+from typing import List, Optional
 from datetime import datetime
 from datetime import date
 import logging
 
-from models import Product, ProductCreate, ProductFilter, ProductResponse
+from models import Product, ProductCreate, ProductFilter, ProductResponse, ProdutoBatchCreate
 from services import product_service
 
 # Configurar logging
@@ -52,6 +52,31 @@ async def criar_produto(produto: ProductCreate):
     except Exception as e:
         logger.error(f"Erro ao criar produto: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Erro ao criar produto: {str(e)}")
+    
+@app.post("/produtos/batch", response_model=List[Product])
+async def criar_produtos_em_lote(batch: ProdutoBatchCreate):
+    """Cria múltiplos produtos em uma única requisição"""
+    try:
+        # Define a data (atual se não informada)
+        data = batch.data if batch.data else datetime.now().date().isoformat()
+        
+        # Cria cada produto
+        created_products = []
+        for produto in batch.produtos:
+            product_data = {
+                "descricao": produto.descricao,
+                "sku": produto.sku,
+                "preco": produto.preco,
+                "local": batch.local,
+                "data": data
+            }
+            new_product = await product_service.create_product(ProductCreate(**product_data))
+            created_products.append(new_product)
+        
+        return created_products
+        
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 @app.get("/produtos", response_model=ProductResponse)
 async def listar_produtos(

@@ -1,5 +1,16 @@
 from pydantic import BaseModel, Field
 from typing import Optional
+from typing import List
+
+class ProdutoItem(BaseModel):
+    descricao: str
+    sku: str
+    preco: float = Field(..., gt=0)
+
+class ProdutoBatchCreate(BaseModel):
+    local: str
+    data: Optional[str] = None  # Opcional (será preenchida se não informada)
+    produtos: List[ProdutoItem]
 
 class ProductCreate(BaseModel):
     """Modelo para criar um novo produto"""
